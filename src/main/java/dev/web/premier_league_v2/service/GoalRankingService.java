@@ -2,6 +2,7 @@ package dev.web.premier_league_v2.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.web.premier_league_v2.dto.LeaderboardResponse;
+import dev.web.premier_league_v2.dto.PlayerEntry;
 import dev.web.premier_league_v2.model.GoalRanking;
 import dev.web.premier_league_v2.repository.GoalRepository;
 import org.springframework.web.client.RestTemplate;
@@ -26,9 +27,29 @@ public class GoalRankingService {
     String url = API_URL;
     int rank = 1;
 
-    while(url != null ){
+    while(url !=null){
         String json = restTemplate.getForObject(url, String.class);
 
-        LeaderboardResponse response = objectMapper.readValue(json,LeaderboardResponse.class);
+        LeaderboardResponse response = objectMapper.readValue(json, LeaderboardResponse.class);
+
+        for (PlayerEntry entry : response.getData()) {
+            if (entry.getStats() == null || entry.getStats().getGoals() == null)
+                continue;
+        }
+
+        GoalRanking ranking = mapToGoalRanking(entry, rank);
+        allRanking.add(ranking);
+        rank++;
+
+        String nextCursor = response.getPagination().getnext();
+        url = (nextCursor !=null) ? API_URL + "&_next=" + nextCursor : null;
     }
+
+    saveToJsonFile(allRankings);
+
+    repository.deleteAll();
+    return repository.saveAll(allRankings)
+
+
+
 }
