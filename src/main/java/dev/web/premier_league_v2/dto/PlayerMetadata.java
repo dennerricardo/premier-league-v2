@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class PlayerMetadata {
     private String name;
     private String position;
-    private String Country;
+    private Country country;
     private Team currentTeam;
 
 
@@ -26,12 +26,12 @@ public class PlayerMetadata {
         this.position = position;
     }
 
-    public String getCountry() {
-        return Country;
+    public Country getCountry() {
+        return country;
     }
 
-    public void setCountry(String country) {
-        Country = country;
+    public void setCountry(Country country) {
+        this.country = country;
     }
 
     public Team getCurrentTeam() {

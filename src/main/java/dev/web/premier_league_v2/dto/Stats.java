@@ -4,15 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Stats {
-    private int goals;
+    private Double  goals;
     private int appearances;
 
 
-    public int getGoals() {
+    public Double  getGoals() {
         return goals;
     }
 
-    public void setGoals(int goals) {
+    public void setGoals(Double  goals) {
         this.goals = goals;
     }
 

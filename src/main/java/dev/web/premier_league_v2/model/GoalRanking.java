@@ -17,16 +17,6 @@ public class GoalRanking {
     private int rankPosition;
     private int goals;
 
-    public GoalRanking(Long id, String playerName, String team, String position, String country, int rankPosition, int goals) {
-        this.id = id;
-        this.playerName = playerName;
-        this.team = team;
-        this.position = position;
-        this.country = country;
-        this.rankPosition = rankPosition;
-        this.goals = goals;
-    }
-
 
     public Long getId() {
         return id;
