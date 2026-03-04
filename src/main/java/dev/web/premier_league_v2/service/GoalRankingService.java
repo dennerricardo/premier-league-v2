@@ -9,6 +9,7 @@ import dev.web.premier_league_v2.repository.GoalRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 @Service
 public class GoalRankingService {
@@ -28,7 +29,7 @@ public class GoalRankingService {
         try {
 
             List<GoalRanking> allRankings = new ArrayList<>();
-            String url = API_URL; int rank = 1;
+            String url = API_URL;
 
             while(url != null){
                 String json = restTemplate.getForObject(url, String.class);
@@ -39,24 +40,36 @@ public class GoalRankingService {
                     if (entry.getStats() == null || entry.getStats().getGoals() == null)
                     continue;
 
-                    GoalRanking ranking = mapToGoalRanking(entry, rank);
+                    GoalRanking ranking = mapToGoalRanking(entry);
                     allRankings.add(ranking);
-                    rank++;
                 }
 
                 String nextCursor = response.getPagination().get_next();
                 url = (nextCursor != null) ? API_URL + "&_next=" + nextCursor : null;
             }
+            allRankings.sort(Comparator.comparingInt(GoalRanking::getGoals).reversed()
+                    .thenComparing(GoalRanking::getPlayerName));
 
+            int rank = 1;
+            for(int i = 0; i < allRankings.size();i++){
+                if(i > 0 && allRankings.get(i).getGoals() == allRankings.get(i - 1).getGoals()){
+                    allRankings.get(i).setRankPosition(allRankings.get(i - 1).getRankPosition());
+                }else{
+                    allRankings.get(i).setRankPosition(rank);
+                }
+                rank++;
+            }
+
+            saveToJsonFile(allRankings);
             repository.deleteAll();
             return repository.saveAll(allRankings);
 
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao buscar e salvar rankings de gols", e);
+            throw new RuntimeException("Error searching and saving goal rankings.", e);
         }
     }
 
-    private GoalRanking mapToGoalRanking(PlayerEntry entry, int rank) {
+    private GoalRanking mapToGoalRanking(PlayerEntry entry) {
         PlayerMetadata metadata = entry.getPlayerMetadata();
         Stats stats = entry.getStats();
 
@@ -68,7 +81,6 @@ public class GoalRankingService {
         ranking.setCountry(metadata.getCountry().getCountry());
         ranking.setPosition(metadata.getPosition());
         ranking.setGoals(stats.getGoals().intValue());
-        ranking.setRankPosition(rank);
 
         return ranking;
     }
@@ -80,6 +92,6 @@ public class GoalRankingService {
         }
     }
     public List<GoalRanking> getAll() {
-        return repository.findAll();
+        return repository.findAllByOrderByGoalsDesc();
     }
 }

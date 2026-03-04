@@ -17,28 +17,18 @@ public class GoalRankingController {
         this.service = service;
     }
 
-    // ── POST /api/rankings/fetch ─────────────────────────────────
-    // calls the PL API → saves JSON file → persists to H2
     @PostMapping("/fetch")
     public ResponseEntity<List<GoalRanking>> fetchAndPersist() {
-//        try {
             List<GoalRanking> rankings = service.fetchAndSaveGoalRankings();
             return ResponseEntity.ok(rankings);
-//        } catch (Exception e) {
-//            return ResponseEntity.internalServerError().build();
-//        }
     }
 
-    // ── GET /api/rankings ────────────────────────────────────────
-    // reads everything from H2
     @GetMapping
     public ResponseEntity<List<GoalRanking>> getAll() {
         List<GoalRanking> rankings = service.getAll();
-
         if (rankings.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-
         return ResponseEntity.ok(rankings);
     }
 }
